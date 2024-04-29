@@ -1,0 +1,407 @@
+import * as d3 from "d3";
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Col } from 'antd';
+import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { request } from '@/request';
+
+import ReactApexChart from 'react-apexcharts';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+const MARGIN = { top: 30, right: 30, bottom: 40, left: 50 };
+const barWidth = 8 * 60 / 5;  // when the working time is 8 hours
+const mouseClickIdleIndex = 0.4, keyIdleIndex = 0.4, mouseIdleIndex = 0.2
+const startTime = 3;
+const endTime = 23;
+let preWidth = 0;
+
+const TimeLineChart = ({ width, height, data, currentAdmin }) => {
+  const entity = `timeLine/timeLine`;
+  const numOfZeros = (endTime - startTime) * 60 / 5;
+  const [timeLineData, setTimeLineData] = useState([]);
+  const [apexChartsData, setApexChartsData] = useState([]);
+  const [buttonPositions, setButtonPositions] = useState([]);
+  const chartContainerRef = useRef(null);
+  const [chartWidth, setChartWidth] = useState(null);
+  const [buttons, setButtons] = useState();
+  const chartRef = useRef(null);
+
+  const [barData, setBarData] = useState({ value: [], label: [] });
+
+  const dispatcher = async () => {
+    const jsonData = { userId: currentAdmin._id, selectedDate: new Date() };
+    const data = await request.post({ entity, jsonData });
+    const results = data.result;
+    setTimeLineData(results);
+  };
+
+  const generateLabels = () => {
+    const labels = [];
+    for (let hour = startTime; hour < endTime; hour++) {
+      for (let minute = 0; minute < 60; minute += 5) {
+        const timeStr = `${hour < 10 ? '0' + hour : hour}:${minute < 10 ? '0' + minute : minute}`;
+        const nextMinute = minute + 5;
+        const nextHour = nextMinute >= 60 ? hour + 1 : hour;
+        const nextMinuteFormatted = nextMinute >= 60 ? '00' : nextMinute;
+        const nextHourFormatted = nextMinute >= 60 ? (nextHour < 10 ? '0' + nextHour : nextHour) : hour;
+        const nextTimeStr = `${nextHourFormatted}:${nextMinuteFormatted}`;
+        labels.push(`${timeStr} - ${nextTimeStr}`);
+      }
+    }
+    return labels;
+  };
+
+  useEffect(() => {
+    const labels = generateLabels();
+    console.log(labels);
+    setBarData({ value: Array.from({ length: numOfZeros }, () => 1), label: labels });
+    dispatcher();
+  }, []);
+
+  useEffect(() => {
+    const updateChartWidth = () => {
+      const apexGraphical = document.querySelector('.apexcharts-graphical');
+      console.log(apexGraphical);
+      if (apexGraphical) {
+        const width = apexGraphical.getBoundingClientRect().width;
+        console.log("-=-=-=-=-=-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
+        setChartWidth(width);
+      }
+      // if (chartRef.current) {
+      //   console.log("-=-=-=-=-=-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
+
+      //   // const apexGraphical = chartRef.current.chart.chart.querySelector('.apexcharts-graphical');;
+      //   // if (apexGraphical) {
+      //   //   const width = apexGraphical.getBoundingClientRect().width;
+      //   //   setChartWidth(width);
+      //   // }
+      // }
+
+      if (chartContainerRef) {
+        console.log("-----jjjjjjjjjjjjjj--------");
+      }
+    };
+
+    window.addEventListener('resize', updateChartWidth);
+    updateChartWidth(); // Initial width calculation
+
+    return () => {
+      window.removeEventListener('resize', updateChartWidth);
+    };
+  }, []);
+
+  const getTimeFromCreated = (timeInMilliseconds) => {
+    // const timestamp = "2024-03-28T09:10:53.522Z";
+    const dateFromMilliseconds = new Date(timeInMilliseconds * 1000);
+
+    const hours = String(dateFromMilliseconds.getUTCHours()).padStart(2, '0'); // Get hours in UTC format
+    const minutes = String(dateFromMilliseconds.getUTCMinutes()).padStart(2, '0'); // Get minutes in UTC format
+
+    const formattedTime = `${hours}:${minutes}`;
+    return formattedTime;
+  }
+
+  const updateBarData = (start, value) => {
+    const currentTime = new Date(start * 1000);
+    const currentHour = currentTime.getUTCHours();
+    const currentMinute = currentTime.getUTCMinutes();
+    const currentTimeInMinutes = currentHour * 60 + currentMinute;
+    console.log(currentTimeInMinutes);
+
+    if (currentTimeInMinutes >= startTime * 60 && currentTimeInMinutes <= endTime * 60) {
+      // Calculate the index corresponding to the current time
+      const index = Math.floor((currentTimeInMinutes - startTime * 60) / 5);
+
+      // Update the array at the calculated index with current data
+      if (barData.value[index] === 1)
+        barData.value[index] = value; // Replace 'Current Data' with your actual data
+      // else
+      //   barData.value[index] = (value + barData.value[index]) / 2;
+    }
+  }
+
+  const handleBarData = () => {
+    console.log(timeLineData);
+    const activityBars = { range: { start: [], end: [] }, value: [] };
+    if (timeLineData.length > 0) {
+      timeLineData.map(item => {
+        let start = new Date(item.created).getTime() / 1000;
+        if (item.spentType === 'working time') {
+          let mouseIdle = 0, keyIdle = 0, clickIdle = 0, total = 0, totalTime = 0;
+          item.workData.map((wdata, idx) => {
+
+            if ((start + total) % 300 < 60 && total > 60) {   /// the time set 1 min
+              // console.log((total - (mouseIdle * mouseIdleIndex) - (keyIdle * keyIdleIndex) - (clickIdle * mouseClickIdleIndex)));
+              // console.log(total - (mouseIdle * mouseIdleIndex) + (keyIdle * keyIdleIndex) + (clickIdle * mouseClickIdleIndex)) / total;
+              const value = Math.floor(Math.abs((total - (mouseIdle * mouseIdleIndex) - (keyIdle * keyIdleIndex) - (clickIdle * mouseClickIdleIndex)) / total * 100));
+              activityBars.value.push(value);
+              activityBars.range.start.push(getTimeFromCreated(start));
+              activityBars.range.end.push(getTimeFromCreated(start + total));
+              console.log("-------------working---------------");
+              console.log(getTimeFromCreated(start));
+              console.log(getTimeFromCreated(start + total));
+              console.log(value);
+
+              updateBarData(start, value);
+
+              start += total;
+
+              mouseIdle = wdata.mouseIdle;
+              keyIdle = wdata.keyIdle;
+              clickIdle = wdata.mouseClickIdle;
+              total = wdata.range;
+            } else {
+              // console.log(wdata.range);
+              mouseIdle += wdata.mouseIdle;
+              keyIdle += wdata.keyIdle;
+              clickIdle += wdata.mouseClickIdle;
+              total += wdata.range;
+            }
+          })
+          // rest of item
+          console.log("===========================");
+          console.log(getTimeFromCreated(start));
+          console.log(getTimeFromCreated(start + total));
+          const value = Math.floor(Math.abs((total - (mouseIdle * mouseIdleIndex) - (keyIdle * keyIdleIndex) - (clickIdle * mouseClickIdleIndex)) / total * 100));
+          activityBars.value.push(value)
+          activityBars.range.start.push(getTimeFromCreated(start));
+          activityBars.range.end.push(getTimeFromCreated(start + total));
+          updateBarData(start, value);
+        } else if (item.spentType === 'idle limit') {
+          let timeRange = item.timeRange;
+          console.log("-------------idle---------------");
+          console.log(getTimeFromCreated(start));
+          console.log(getTimeFromCreated(start + timeRange));
+          while (timeRange > 300) {
+            activityBars.range.start.push(getTimeFromCreated(start));
+            activityBars.range.end.push(getTimeFromCreated(start + 300));
+            activityBars.value.push(0);
+            timeRange -= 300;
+            start += 300;
+            updateBarData(start, 100);
+          }
+          // rest of timeRange
+          activityBars.range.start.push(getTimeFromCreated(start));
+          activityBars.range.end.push(getTimeFromCreated(start + timeRange));
+          activityBars.value.push(0);
+          updateBarData(start, 100);
+        } else if (item.spentType === 'private time') {
+          let timeRange = item.workData[0].privateTime;
+          console.log("-------------private---------------");
+          console.log(getTimeFromCreated(start));
+          console.log(getTimeFromCreated(start + timeRange));
+          // while (timeRange > 0) {
+          //   activityBars.range.start.push(getTimeFromCreated(start));
+          //   activityBars.range.end.push(getTimeFromCreated(start + 300));
+          //   activityBars.value.push(0);
+          //   timeRange -= 300;
+          //   start += 300;
+          // }
+          // rest of timeRange
+          activityBars.range.start.push(getTimeFromCreated(start));
+          activityBars.range.end.push(getTimeFromCreated(start + timeRange));
+          activityBars.value.push(0);
+        }
+      })
+    }
+
+    console.log(activityBars);
+  }
+
+  const calculateButtonPositions = () => {
+    const positions = [];
+    for (let i = 0; i < 144; i++) {
+      positions.push({ top: `${i * (100 / 144)}%` });
+    }
+    setButtonPositions(positions);
+  };
+
+  const generateAnnotations = () => {
+    const annotations = {
+      points: []
+    };
+
+    // Calculate the total number of bars in the chart
+    const totalBars = (endTime - startTime) * 60 / 5;
+
+    // Calculate the width of each bar
+    const barWidth = 100 / totalBars;
+
+    // Iterate over the data array
+    const buttons = timeLineData.map((item, index) => {
+      // Convert created time to milliseconds
+      const createdTime = new Date(item.created);
+      const createdTimestamp = createdTime.getTime() / 1000;
+
+      // const minutes = createdTime.getUTCMinutes();
+      // const seconds = createdTime.getUTCSeconds();
+      // const milliseconds = createdTime.getUTCMilliseconds();
+
+      const startTimestamp = new Date(createdTime.setUTCHours(startTime, 0, 0, 0)) / 1000;
+      const endTimestamp = new Date(createdTime.setUTCHours(endTime, 0, 0, 0)) / 1000;
+      // Calculate the position of the button relative to the chart
+      let startPos = (((createdTimestamp - startTimestamp) / (endTimestamp - startTimestamp)) * 100);
+
+      // Calculate the width of the button relative to the chart
+      let buttonWidth = ((item.timeRange / (endTimestamp - startTimestamp)) * 100);
+      let buttonWidthPercentage;
+      if ((buttonWidth + startPos) > 100) {
+        buttonWidth = 100 - startPos;
+      }
+
+      if(startPos + buttonWidth < 0) {
+        return;
+      }
+      console.log("5555555555555555555555555555555555555555555");
+
+      console.log(startPos);
+      console.log(buttonWidth);
+
+      if(startPos < 0) {
+        buttonWidth += startPos;
+        startPos = 0;
+      }
+
+      console.log(startPos);
+      console.log(buttonWidth);
+
+      // Convert pixels back to percentage
+      console.log("-----0-0-0-0-0-0-0-0-0-0-");
+      console.log(createdTimestamp);
+      console.log(buttonWidth);
+      console.log(startPos);
+      console.log("1-1-1-1--1-1-1-1-1-11--");
+
+      // Add annotation for the button
+      return (
+        <div
+          key={index}
+          style={{
+            position: 'absolute',
+            left: `${startPos}%`,
+            width: `${buttonWidth}%`,
+            height: '20px',
+            backgroundColor: item.spentType == 'working time' ? `green` : item.spentType === 'idle limit' ? '#DEBA8B' : 'bg-grey-400',
+            color: `#fff`,
+            textAlign: 'center',
+            lineHeight: '20px',
+            borderRadius: '5px',
+            // bottom: '7px',
+          }}
+          onClick={() => handleButtonClick(index)}
+        >
+          {/* Optionally include text inside the button */}
+          {/* {item.spentType} */}
+        </div>
+      );
+    });
+
+    // const container = chartContainerRef.current;
+    // container.appendChild(buttons);
+
+    return buttons
+  };
+
+  useEffect(() => {
+    handleBarData();
+    calculateButtonPositions();
+    const buttons = generateAnnotations();
+    setButtons(buttons);
+    const data = ({
+      series: [{
+        name: 'activity',
+        data: barData.value
+      }],
+      options: {
+        chart: {
+          type: 'bar',
+          height: '200px',
+          zoom: {
+            enabled: false
+          }
+        },
+        plotOptions: {
+
+          bar: {
+            colors: {
+              ranges: [{
+                from: 0,
+                to: 100,
+                color: 'rgb(95, 185, 42)'
+              }]
+            },
+          }
+        },
+        dataLabels: {
+          enabled: false,
+        },
+        xaxis: {
+          labels: {
+            show: false, // Hide x-axis labels
+          }
+        },
+        yaxis: {
+          max: 100,
+          labels: {
+            formatter: function (y) {
+              return (y) + "%"; // Adjusted to display 20%, 40%, 60%, 80%
+            }
+          }
+        },
+        tooltip: {
+          enabled: true,
+          followCursor: false,
+          fillSeriesColor: false,
+          theme: 'light',
+          style: {
+            fontSize: '12px',
+          },
+          marker: {
+            show: true,
+          },
+          onDatasetHover: {
+            highlightDataSeries: true,
+          },
+          x: {
+            formatter: function (val, { seriesIndex, dataPointIndex, w }) {
+              return barData.label[dataPointIndex];
+            }
+          }
+        },
+      },
+    });
+
+    setApexChartsData(data);
+
+  }, [timeLineData])
+
+  // Handle button click
+  const handleButtonClick = (index) => {
+    console.log(`Button ${index + 1} clicked`);
+  };
+
+  
+  useEffect(() => {
+    if (chartRef.current) {
+      const apexGraphical = document.querySelector('.apexcharts-graphical');
+      if (apexGraphical) {
+        const width = apexGraphical.getBoundingClientRect().width;
+        setChartWidth(width);
+      }
+    }
+  }, [chartRef.current]);
+
+  return (
+    <div ref={chartContainerRef} style={{ position: 'relative', height: '100%', width: '100%' }}>
+      {apexChartsData.options && <ReactApexChart ref={chartRef} options={apexChartsData.options} series={apexChartsData.series} type="bar" height="200px" />}
+      <div className="relative	-mt-7 h-[20px] bg-slate-300" style={{ width: `${chartWidth}px`, marginLeft: '62px' }}>
+        <div className="absolute inset-0 bg-grey-200 " style={{ width: `${chartWidth}px` }}>
+        </div>
+        {buttons}
+      </div>
+    </div>
+  );
+};
+
+export default TimeLineChart;

@@ -1,0 +1,382 @@
+.hiddenLabel {
+  opacity: 0;
+  color: #fff;
+}
+.centerAbsolute {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 32px;
+  height: 38px;
+  margin-left: -16px;
+  margin-top: -19px;
+}
+.whiteBox {
+  background: #fff;
+  border-radius: 6px;
+  width: 100%;
+  min-height: 100px;
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+}
+.shadow {
+  box-shadow: 0px 0px 20px 3px rgba(150, 190, 238, 0.15);
+}
+.shadow:hover {
+  box-shadow: 0px 0px 30px 8px rgba(150, 190, 238, 0.25);
+}
+.line {
+  border-top: 1px solid #edf0f5;
+  width: 100%;
+  margin: 5px auto;
+}
+
+.left {
+  float: left;
+}
+.right {
+  float: right;
+}
+
+.pad5 {
+  padding: 5px;
+}
+.pad10 {
+  padding: 10px;
+}
+.pad15 {
+  padding: 15px;
+}
+.pad20 {
+  padding: 20px;
+}
+.pad25 {
+  padding: 25px;
+}
+.pad30 {
+  padding: 30px;
+}
+.pad33 {
+  padding: 35px;
+}
+.pad40 {
+  padding: 40px;
+}
+
+.mrg5 {
+  margin: 5px;
+}
+.mrg10 {
+  margin: 10px;
+}
+.mrg15 {
+  margin: 15px;
+}
+.mrg20 {
+  margin: 20px;
+}
+.mrg25 {
+  margin: 20px;
+}
+.mrg30 {
+  margin: 20px;
+}
+
+.alignRight {
+  text-align: right;
+}
+
+.alignLeft {
+  text-align: left;
+}
+
+.center {
+  justify-content: center;
+}
+
+.strong {
+  font-weight: 700;
+}
+
+.space5 {
+  height: 5px;
+  width: 100%;
+  display: block;
+}
+.space10 {
+  height: 10px;
+  width: 100%;
+  display: block;
+}
+.space20 {
+  height: 20px;
+  width: 100%;
+  display: block;
+}
+.space30 {
+  height: 30px;
+  width: 100%;
+  display: block;
+}
+.space40 {
+  height: 40px;
+  width: 100%;
+  display: block;
+}
+.space50 {
+  height: 50px;
+  width: 100%;
+  display: block;
+}
+.space60 {
+  height: 60px;
+  width: 100%;
+  display: block;
+}
+.space70 {
+  height: 70px;
+  width: 100%;
+  display: block;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.circle {
+  border-radius: 50%;
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+.layoutPadding {
+  position: relative;
+  padding: 50px 40px;
+}
+
+.dashboardSpacing {
+  padding: 30px 40px;
+  margin: 70px auto;
+}
+
+.ant-badge-status-dot {
+  width: 14px!important;
+  height: 14px!important;
+}
+
+.ant-badge.ant-badge-status {
+  vertical-align: top;
+}
+
+/* Activity Report */
+.rs-progress-line-inner {
+  height: 130px;
+  background-color: #edf0f5;
+  position: relative;
+  border-radius: 10px;
+}
+
+.rs-progress-line-bg {
+  position: absolute;
+  bottom: 0;
+  width: 10px;
+  border-radius: 10px;
+}
+
+.grid-template-auto {
+  grid-template-columns: auto auto;
+}
+
+.sheet-item {
+  width: 100%;
+  min-height: 42px;
+  display: flex;
+  -webkit-box-pack: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  align-items: center;
+  border: 1px solid rgb(194, 204, 225);
+  margin-top: 10px;
+  background: rgb(255, 255, 255);
+  border-radius: 8px;
+}
+
+.user-select-btn {
+  position: relative;
+  right: 0px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgb(255, 255, 255);
+  line-height: 40px;
+  text-align: center;
+  color: rgb(255, 255, 255);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.user-select {
+  position: absolute;
+  top: 50px;
+  left: 0px;
+  max-height: 300px;
+  overflow: auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  -webkit-box-pack: center;
+  justify-content: center;
+  row-gap: 0px;
+  width: 260px;
+  padding: 0px 0px 10px;
+  border: 1px solid rgb(64, 87, 190);
+  border-radius: 6px;
+  z-index: 5;
+  background-color: rgb(255, 255, 255);
+}
+
+.user-select-list {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  -webkit-box-pack: center;
+  justify-content: center;
+  row-gap: 0px;
+}
+
+.user-select-search {
+  position: sticky;
+  padding: 10px 8px 0px;
+  margin: 0px 0px 5px;
+  background: rgb(255, 255, 255);
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  z-index: 10;
+}
+
+.user-select-item {
+  display: grid;
+  grid-template-columns: 30px auto;
+  column-gap: 12px;
+  padding: 7px 8px;
+  -webkit-box-align: center;
+  align-items: center;
+}
+
+.task-search> span> input {
+  min-height: 2.5rem;
+}
+
+.task-search> .ant-input-group> .ant-input-group-addon> button {
+  min-height: 2.5rem;
+  background-color: rgb(94, 234, 212);
+}
+
+.task-search> .ant-input-group> .ant-input-group-addon> button:hover {
+  min-height: 2.5rem;
+  background-color: rgb(132, 211, 199);
+}
+
+.task-search> .ant-input-group> .ant-input-group-addon> button> span {
+  padding-top: 6px;
+}
+
+.client-card-control {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto;
+  -webkit-box-pack: center;
+  place-content: center;
+  border-radius: 50%;
+  border: 1px solid rgb(228, 231, 235);
+  padding: 2px;
+  background-color: white;
+  width: 25px;
+  height: 25px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+
+.assign-btn>.ant-select>.ant-select-selector {
+  border-radius: 100%!important;
+  padding: 0px!important;
+}
+
+.assign-btn>.ant-select>.ant-select-selector>.ant-select-selection-item>.user-select-item {
+  padding: 2px 1px!important;
+}
+
+.ant-select-dropdown {
+  width: 250px!important;
+}
+
+.chart-working-btn:hover {
+  border: dashed!important;
+  border-width: 0.1px;
+  border-color: rgb(208, 219, 208)!important;
+  background-color: rgb(127, 163, 127)!important;
+}
+
+.chart-idle-btn:hover {
+  border: dashed!important;
+  border-width: 0.1px;
+  border-color: rgb(247, 252, 247)!important;
+  background-color: #dac5aa!important;
+}
+
+.chart-private-btn:hover {
+  border: dashed!important;
+  border-width: 0.1px;
+  border-color: rgb(247, 252, 247)!important;
+  background-color: #82bdd8!important;
+}
+
+.dynamic-delete-button {
+  position: relative;
+  top: 4px;
+  margin: 0 8px;
+  color: #999;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.dynamic-delete-button:hover {
+  color: #777;
+}
+.dynamic-delete-button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+
+@media only screen and (min-width: 1100px) {
+  .hidden-lg {
+    display: none;
+  }
+}
+
+@media only screen and (min-width: 768px) {
+  .hidden-md {
+    display: none;
+  }
+}
+
+@media only screen and (min-width: 480px) {
+  .hidden-sm {
+    display: none;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .layoutPadding {
+    padding: 50px 20px;
+  }
+
+  .dashboardSpacing {
+    padding: 30px 20px;
+    margin: 70px auto;
+  }
+}
